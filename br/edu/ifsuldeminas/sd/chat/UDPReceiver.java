@@ -71,6 +71,7 @@ class UDPReceiver implements Receiver {
 		DatagramPacket received = new DatagramPacket(incomingBuffer,
 				incomingBuffer.length);
 		receiverSocket.receive(received);
-		container.newMessage(new String(received.getData()));
+		container.newMessage(new String(received.getData(),0,received.getLength())
+			);
 	}
 }
