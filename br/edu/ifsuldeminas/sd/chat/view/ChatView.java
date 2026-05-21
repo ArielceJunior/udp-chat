@@ -9,152 +9,215 @@ import javax.swing.*;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
-
 import java.awt.*;
+
 
 public class ChatView extends JFrame implements MessageContainer {
 
-	private JTextField txtLocalPort;
-    private JTextField txtRemotePort;
-    private JTextField txtName;
-
     private JTextPane txtMessages;
-
     private JTextField txtMessage;
-
-    private JButton btnConnect;
     private JButton btnSend;
-
+    private JButton btnDisconnect;
     private Sender sender;
+    private String userName;
 
-    public ChatView() {
+    public ChatView(
+            int localPort,
+            int remotePort,
+            String userName
+    ) {
 
-        setTitle("UDP Chat");
-        setSize(700, 450);
+        this.userName = userName;
+
+        setTitle(
+                "UDP Chat - " + userName
+        );
+
+        setSize(700,450);
+
         setLocationRelativeTo(null);
+
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        getContentPane().setBackground(new Color(30, 30, 30));
+        getContentPane().setBackground(
+                new Color(30,30,30)
+        );
 
         initializeComponents();
+
         configureLayout();
+
         configureEvents();
+
+        connect(localPort, remotePort);
 
         setVisible(true);
     }
 
     private void initializeComponents() {
 
-        Font font = new Font("Arial", Font.PLAIN, 14);
-
-        txtLocalPort = new JTextField(5);
-        txtLocalPort.setFont(font);
-
-        txtRemotePort = new JTextField(5);
-        txtRemotePort.setFont(font);
-
-        txtName = new JTextField(10);
-        txtName.setFont(font);
+        Font font =
+                new Font(
+                        "Arial",
+                        Font.PLAIN,
+                        14
+                );
 
         txtMessages = new JTextPane();
         txtMessages.setEditable(false);
-        txtMessages.setBackground(new Color(40, 40, 40));
+        txtMessages.setBackground(
+                new Color(40,40,40)
+        );
         txtMessages.setForeground(Color.WHITE);
         txtMessages.setFont(font);
-
         txtMessage = new JTextField();
         txtMessage.setFont(font);
-        txtMessage.setBackground(new Color(50, 50, 50));
+        txtMessage.setBackground(
+                new Color(50,50,50)
+        );
         txtMessage.setForeground(Color.WHITE);
         txtMessage.setCaretColor(Color.WHITE);
 
-        btnConnect = new JButton("Conectar");
         btnSend = new JButton("Enviar");
-
-        styleButton(btnConnect);
         styleButton(btnSend);
+        
+        btnDisconnect = new JButton("Desconectar");
+        styleDangerButton(btnDisconnect);
     }
 
-    private void styleButton(JButton button) {
+    private void styleDangerButton(JButton button) {
 
-        button.setBackground(new Color(70, 130, 180));
+        button.setBackground(
+                new Color(200,60,60)
+        );
+
         button.setForeground(Color.WHITE);
+
         button.setFocusPainted(false);
+
         button.setBorderPainted(false);
 
-        button.setFont(new Font("Arial", Font.BOLD, 13));
+        button.setFont(
+                new Font(
+                        "Arial",
+                        Font.BOLD,
+                        13
+                )
+        );
 
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setCursor(
+                new Cursor(Cursor.HAND_CURSOR)
+        );
+    } 
+    
+    private void styleButton(JButton button) {
+
+        button.setBackground(
+                new Color(70,130,180)
+        );
+
+        button.setForeground(Color.WHITE);
+
+        button.setFocusPainted(false);
+
+        button.setBorderPainted(false);
+
+        button.setFont(
+                new Font(
+                        "Arial",
+                        Font.BOLD,
+                        13
+                )
+        );
+
+        button.setCursor(
+                new Cursor(Cursor.HAND_CURSOR)
+        );
     }
 
     private void configureLayout() {
 
-        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JScrollPane scrollPane =
+                new JScrollPane(txtMessages);
 
-        topPanel.setBackground(new Color(30, 30, 30));
+        JPanel bottomPanel =
+                new JPanel(
+                        new BorderLayout()
+                );
+        
 
-        topPanel.setBorder(
-                BorderFactory.createEmptyBorder(10, 10, 10, 10)
+        bottomPanel.setBackground(
+                new Color(30,30,30)
         );
-
-        JLabel lblLocal = new JLabel("Porta Local:");
-        lblLocal.setForeground(Color.WHITE);
-
-        JLabel lblRemote = new JLabel("Porta Remota:");
-        lblRemote.setForeground(Color.WHITE);
-
-        JLabel lblName = new JLabel("Nome:");
-        lblName.setForeground(Color.WHITE);
-
-        topPanel.add(lblLocal);
-        topPanel.add(txtLocalPort);
-
-        topPanel.add(lblRemote);
-        topPanel.add(txtRemotePort);
-
-        topPanel.add(lblName);
-        topPanel.add(txtName);
-
-        topPanel.add(btnConnect);
-
-        JScrollPane scrollPane = new JScrollPane(txtMessages);
-
-        JPanel bottomPanel = new JPanel(new BorderLayout());
-
-        bottomPanel.setBackground(new Color(30, 30, 30));
 
         bottomPanel.setBorder(
-                BorderFactory.createEmptyBorder(10, 10, 10, 10)
+                BorderFactory.createEmptyBorder(
+                        10,10,10,10
+                )
         );
 
-        bottomPanel.add(txtMessage, BorderLayout.CENTER);
+        bottomPanel.add(
+                txtMessage,
+                BorderLayout.CENTER
+        );
+
+        bottomPanel.add(
+                btnSend,
+                BorderLayout.EAST
+        );
+        
         bottomPanel.add(btnSend, BorderLayout.EAST);
+        
+        JPanel buttonsPanel = new JPanel(
+                new GridLayout(1,2,5,0)
+        );
+
+        buttonsPanel.setBorder(
+                BorderFactory.createEmptyBorder(
+                        0,10,0,0
+                )
+        );
+
+        buttonsPanel.setBackground(
+                new Color(30,30,30)
+        );
+
+        buttonsPanel.add(btnDisconnect);
+
+        buttonsPanel.add(btnSend);
+
+        bottomPanel.add(
+                buttonsPanel,
+                BorderLayout.EAST
+        );
 
         setLayout(new BorderLayout());
 
-        add(topPanel, BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
+
         add(bottomPanel, BorderLayout.SOUTH);
     }
 
     private void configureEvents() {
 
-        btnConnect.addActionListener(e -> connect());
+        btnSend.addActionListener(
+                e -> sendMessage()
+        );
 
-        btnSend.addActionListener(e -> sendMessage());
-
-        txtMessage.addActionListener(e -> sendMessage());
+        txtMessage.addActionListener(
+                e -> sendMessage()
+        );
+        btnDisconnect.addActionListener(
+                e -> disconnect()
+        );
     }
 
-    private void connect() {
+    private void connect(
+            int localPort,
+            int remotePort
+    ) {
 
         try {
-
-            int localPort =
-                    Integer.parseInt(txtLocalPort.getText());
-
-            int remotePort =
-                    Integer.parseInt(txtRemotePort.getText());
 
             sender = ChatFactory.build(
                     "localhost",
@@ -165,11 +228,9 @@ public class ChatView extends JFrame implements MessageContainer {
 
             appendColoredMessage(
                     "Sistema",
-                    "Chat conectado.",
+                    "Conectado ao chat.",
                     Color.ORANGE
             );
-
-            btnConnect.setEnabled(false);
 
         } catch (Exception e) {
 
@@ -179,6 +240,13 @@ public class ChatView extends JFrame implements MessageContainer {
             );
         }
     }
+    
+    private void disconnect() {
+
+        dispose();
+
+        new ConnectionView();
+    }
 
     private void sendMessage() {
 
@@ -186,7 +254,7 @@ public class ChatView extends JFrame implements MessageContainer {
 
             JOptionPane.showMessageDialog(
                     this,
-                    "Conecte primeiro."
+                    "Erro na conexão."
             );
 
             return;
@@ -199,15 +267,12 @@ public class ChatView extends JFrame implements MessageContainer {
             return;
         }
 
-        String from =
-                txtName.getText().trim();
-
         String formattedMessage =
                 String.format(
                         "%s%s%s",
                         message,
                         MessageContainer.FROM,
-                        from
+                        userName
                 );
 
         try {
@@ -215,7 +280,7 @@ public class ChatView extends JFrame implements MessageContainer {
             sender.send(formattedMessage);
 
             appendColoredMessage(
-                    "Eu",
+                    "EU",
                     message,
                     Color.GREEN
             );
@@ -236,10 +301,14 @@ public class ChatView extends JFrame implements MessageContainer {
 
         SwingUtilities.invokeLater(() -> {
 
-            if (message.contains(MessageContainer.FROM)) {
+            if (message.contains(
+                    MessageContainer.FROM
+            )) {
 
                 String[] parts =
-                        message.split(MessageContainer.FROM);
+                        message.split(
+                                MessageContainer.FROM
+                        );
 
                 String text = parts[0];
 
@@ -315,10 +384,5 @@ public class ChatView extends JFrame implements MessageContainer {
 
             e.printStackTrace();
         }
-    }
-
-    public static void main(String[] args) {
-
-        SwingUtilities.invokeLater(ChatView::new);
     }
 }
